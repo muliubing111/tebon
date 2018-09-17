@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration debug="true">
+
+    <!--boot2.0以上版本不能加赠配置，会报错： -->
+    <!-- Caused by: java.lang.IllegalStateException: Logback configuration error detected:
+ERROR in ch.qos.logback.classic.PatternLayout("") - Empty or null pattern.-->
+    <!--<include resource="org/springframework/boot/logging/logback/base.xml"/>-->
+
+    <!-- 上下文名称 -->
+    <contextName>ams</contextName>
+
+    <!-- 日志文件保存路径 -->
+    <property name="LOG_PATH" value="/data/var/logs/ams"/>
+    <!-- 外部jar打印日志级别 -->
+    <property name="logger.outside.logLevel" value="INFO"/>
+    <!-- 项目内打印日志级别 -->
+    <property name="logger.logLevel" value="INFO"/>
+
+    <!-- 本地开发控制台日志输出设置 -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <!--此日志appender是为开发使用，只配置最底级别，控制台输出的日志级别是大于或等于此级别的日志信息-->
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>info</level>
+        </filter>
+        <!-- encoder 可以指定字符集，对于中文输出有意义 -->
+        <encoder>
+            <charset>UTF-8</charset>
+            <!-- %.-1level 只显示信息级别的首字母,%-5level 左对齐显示信息级别全称 -->
+            <!-- 如需自定义关键字，用 %mdc{键名} 表示,程序中用MDC.put("键名","键值")设置，可动态设置 [%logger:%line]-->
+            <Pattern>
+                [%date{yyyy-MM-dd HH:mm:ss}] |- %-5level %logger %line [t: %t] --%mdc{client} [%X{TRACE_ID}] %msg %n
+            </Pattern>
+        </encoder>
+    </appender>
+
+    <appender name="INFO_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <File>${LOG_PATH}/ams.log</File>
+        <encoder>
+            <Pattern>
+                [%date{yyyy-MM-dd HH:mm:ss}] |- %-5level %logger %line [t: %t] --%mdc{client} [%X{TRACE_ID}] %msg %n
+            </Pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- 存档文件命名格式 -->
+            <fileNamePattern>
+                ${LOG_PATH}/ams.info.%d{yyyy-MM-dd}.%i.log
+            </fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <!-- 单个文件滚动大小 -->
+                <maxFileSize>100MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+            <!-- 最多保留最近15天 -->
+            <maxHistory>15</maxHistory>
+        </rollingPolicy>
+    </appender>
+
+    <!--开发环境:打印控制台 官方推荐使用的xml名字的格式为：logback-spring.xml而不是logback.xml，至于为什么，因为带spring后缀的可以使用<springProfile>这个标签。-->
+    <!-- <springProfile name="dev">
+         <logger name="com.nmys.view" level="debug"/>
+     </springProfile>-->
+
+
+    <!-- 输出到控制台和文件，可定义更多的 Appender -->
+    <root level="${logger.logLevel}">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="INFO_FILE"/>
+    </root>
+
+</configuration>

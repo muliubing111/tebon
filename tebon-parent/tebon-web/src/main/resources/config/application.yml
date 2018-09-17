@@ -1,0 +1,14 @@
+server:
+  port: 80
+  servlet:
+    context-path: /ams
+    session:
+      timeout: 60
+spring:
+  profiles:
+    active: dev
+
+
+
+
+
